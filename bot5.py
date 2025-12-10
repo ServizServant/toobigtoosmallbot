@@ -25,7 +25,7 @@ from aiogram.exceptions import TelegramRetryAfter
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_IDS = list(map(int, os.getenv("ADMIN_IDS", "").split(",")))
 SHEET_ID = os.getenv("SHEET_ID")
-SHEET_NAME = os.getenv("SHEET_NAME", "Лист1")
+SHEET_NAME = os.getenv("SHEET_NAME")
 SERVICE_ACCOUNT_FILE = os.getenv("SERVICE_ACCOUNT_FILE", "service_account.json")
 
 POLL_INTERVAL = int(os.getenv("POLL_INTERVAL", 10))
@@ -162,7 +162,12 @@ def get_sheet():
     creds = ServiceAccountCredentials.from_json_keyfile_name(SERVICE_ACCOUNT_FILE, scope)
     client = gspread.authorize(creds)
     doc = client.open_by_key(SHEET_ID)
-    return doc.worksheet(SHEET_NAME)
+
+    # Если SHEET_NAME не указан → берем первый лист
+    if not SHEET_NAME:
+        return doc.get_worksheet(0)
+    else:
+        return doc.worksheet(SHEET_NAME)
 
 # =========================
 # UTILS
