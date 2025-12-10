@@ -159,15 +159,22 @@ def get_sheet():
         "https://www.googleapis.com/auth/spreadsheets",
         "https://www.googleapis.com/auth/drive"
     ]
-    creds = ServiceAccountCredentials.from_json_keyfile_name(SERVICE_ACCOUNT_FILE, scope)
+
+    # Файл должен лежать рядом с bot5.py
+    creds_path = "service_account.json"
+
+    if not os.path.exists(creds_path):
+        raise RuntimeError("service_account.json not found in project root")
+
+    creds = ServiceAccountCredentials.from_json_keyfile_name(
+        creds_path,
+        scope
+    )
+
     client = gspread.authorize(creds)
     doc = client.open_by_key(SHEET_ID)
+    return doc.worksheet(SHEET_NAME)
 
-    # Если SHEET_NAME не указан → берем первый лист
-    if not SHEET_NAME:
-        return doc.get_worksheet(0)
-    else:
-        return doc.worksheet(SHEET_NAME)
 
 # =========================
 # UTILS
